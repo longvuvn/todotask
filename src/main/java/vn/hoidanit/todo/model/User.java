@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import vn.hoidanit.todo.enums.UserStatus;
@@ -50,6 +52,7 @@ public class User {
         this.updatedTime = Instant.now(); // Cập nhật thời gian khi chỉnh sửa
     }
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Task> tasks;
 }

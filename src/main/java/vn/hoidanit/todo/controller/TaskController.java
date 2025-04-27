@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 
-import vn.hoidanit.todo.dto.TaskRequest;
-import vn.hoidanit.todo.model.Task;
+import vn.hoidanit.todo.model.*;
 import vn.hoidanit.todo.service.TaskService;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,16 +28,12 @@ public class TaskController {
     }
 
     @PostMapping
-    public Task createTask(@RequestBody TaskRequest taskRequest) {
-        return taskService.createTask(
-                new Task(
-                        taskRequest.getTitle(),
-                        taskRequest.getNote(),
-                        taskRequest.isCompleted(),
-                        taskRequest.getDeadline(),
-                        taskRequest.getStatus()),
-                taskRequest.getUserId(),
-                taskRequest.getCategoryId());
+    public Task createTask(@RequestBody @Validated Task task) {
+        User user = taskService.getUserById(task.getUserId());
+        Category category = taskService.getCategoryById(task.getCategoryId());
+        task.setUser(user);
+        task.setCategory(category);
+        return taskService.createTask(task);
     }
 
     @PutMapping("/{id}")

@@ -3,17 +3,17 @@ package vn.hoidanit.todo.service.impl;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
 import vn.hoidanit.todo.model.Category;
 import vn.hoidanit.todo.repository.CategoryRepository;
 import vn.hoidanit.todo.service.CategoryService;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public List<Category> getAllCategories() {

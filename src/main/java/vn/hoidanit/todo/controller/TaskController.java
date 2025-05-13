@@ -3,46 +3,61 @@ package vn.hoidanit.todo.controller;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 
 import vn.hoidanit.todo.model.*;
 import vn.hoidanit.todo.service.TaskService;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/v1/tasks")
+@RequiredArgsConstructor
 public class TaskController {
-
-    @Autowired
-    private TaskService taskService;
+    private final TaskService taskService;
 
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<List<Task>> getAllTasks(Authentication authentication) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(taskService.getAllTasks());
     }
 
     @GetMapping("/{id}")
-    public Task getByTaskId(@PathVariable UUID id) {
-        return taskService.getTaskById(id);
+    public ResponseEntity<Task> getByTaskId(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(taskService.getTaskById(id));
     }
 
     @PostMapping
-    public Task createTask(@RequestBody @Validated Task task) {
-        User user = taskService.getUserById(task.getUserId());
-        Category category = taskService.getCategoryById(task.getCategoryId());
+    public ResponseEntity<Task> createTask(@RequestBody @Validated Task task, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // Trả về lỗi 401 nếu không có xác thực
+        }
+
+        // Lấy thông tin người dùng từ token
+        User user = (User) authentication.getPrincipal();
+
+        // Gán user vào task
         task.setUser(user);
-        task.setCategory(category);
-        return taskService.createTask(task);
+
+        // Tạo task
+        Task createdTask = taskService.createTask(task);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable UUID id, @RequestBody Task task) {
-        return taskService.updateTask(id, task);
+    public ResponseEntity<Task> updateTask(@PathVariable UUID id, @RequestBody Task task) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(taskService.updateTask(id, task));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTask(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteTask(@PathVariable UUID id) {
         taskService.deleteTask(id);
+        return ResponseEntity.noContent().build();
     }
 }

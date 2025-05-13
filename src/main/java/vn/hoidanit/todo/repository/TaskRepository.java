@@ -1,5 +1,6 @@
 package vn.hoidanit.todo.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,11 +11,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, UUID> {
+    List<Task> findByUser_Id(UUID userId);
 }
-
-// @Modifying
-// @Transactional
-// @Query("UPDATE Task t SET t.user = :user, t.category = :category WHERE t.id =
-// :taskId")
-// void saveChange(@Param("taskId") UUID taskId, @Param("user") User user,
-// @Param("category") Category category);

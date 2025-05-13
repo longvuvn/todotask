@@ -3,9 +3,9 @@ package vn.hoidanit.todo.service.impl;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
 import vn.hoidanit.todo.model.Category;
 import vn.hoidanit.todo.model.Task;
 import vn.hoidanit.todo.model.User;
@@ -13,16 +13,11 @@ import vn.hoidanit.todo.repository.*;
 import vn.hoidanit.todo.service.TaskService;
 
 @Service
+@RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public Task getTaskById(UUID id) {
@@ -55,6 +50,18 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task createTask(Task task) {
+        if (task.getCategoryId() == null) {
+            throw new IllegalArgumentException("Category ID must not be null");
+        }
+
+        // Lấy category từ database
+        Category category = categoryRepository.findById(task.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found with ID: " + task.getCategoryId()));
+
+        // Gán category vào task
+        task.setCategory(category);
+
+        // Lưu task vào database
         return taskRepository.save(task);
     }
 
@@ -68,6 +75,11 @@ public class TaskServiceImpl implements TaskService {
     public Category getCategoryById(UUID categoryId) {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
+    }
+
+    @Override
+    public List<Task> getTasksByUserId(UUID userId) {
+        return taskRepository.findByUser_Id(userId);
     }
 
 }

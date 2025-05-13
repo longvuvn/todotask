@@ -1,44 +1,64 @@
 package vn.hoidanit.todo.controller;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
 import vn.hoidanit.todo.model.User;
-import vn.hoidanit.todo.service.UserService;
+import vn.hoidanit.todo.security.JwTokenProvider;
+import vn.hoidanit.todo.service.dto.LoginRequest;
+import vn.hoidanit.todo.service.impl.CustomUserDetailsService;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final JwTokenProvider tokenProvider;
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService userDetailsService;
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+
+            String token = tokenProvider.generateToken(authentication);
+
+            // Lấy thông tin người dùng từ cơ sở dữ liệu
+            User user = userDetailsService.findByUsername(request.getUsername());
+
+            return ResponseEntity.ok(Map.of(
+                    "token", token,
+                    "user", Map.of(
+                            "id", user.getId(),
+                            "username", user.getUsername(),
+                            "email", user.getEmail())));
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Đăng nhập thất bại");
+        }
     }
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable UUID id) {
-        return userService.getUserById(id);
-    }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+        try {
+            // Kiểm tra xem username đã tồn tại chưa
+            if (userDetailsService.isUsernameExists(user.getUsername())) {
+                return ResponseEntity.badRequest().body("Username already exists");
+            }
 
-    @PostMapping
-    public User createUser(@Validated @RequestBody User user) {
-        return userService.createUser(user);
-    }
+            userDetailsService.saveUser(user);
 
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable UUID id, @RequestBody User user) {
-        return userService.updateUser(id, user);
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+        }
     }
-
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable UUID id) {
-        userService.deleteUser(id);
-    }
-
 }

@@ -3,7 +3,6 @@ package vn.hoidanit.todo.model;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
@@ -50,7 +49,6 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnore // Bỏ qua khi trả về JSON để tránh vòng lặp vô hạn
     private User user;
 
     @ManyToOne
@@ -61,15 +59,12 @@ public class Task {
     @Column(nullable = false)
     private PriorityStatus status;
 
-    // Getter cho userId để sử dụng trong JSON
-    @JsonProperty("userId")
-    public UUID getUserId() {
-        return user != null ? user.getId() : null;
-    }
+    @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private UUID userId;
 
-    // Getter cho categoryId để sử dụng trong JSON
-    @JsonProperty("categoryId")
-    public UUID getCategoryId() {
-        return category != null ? category.getId() : null;
-    }
+    @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private UUID categoryId;
+
 }

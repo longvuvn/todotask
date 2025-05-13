@@ -5,11 +5,9 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.validation.annotation.Validated;
-
 import vn.hoidanit.todo.model.*;
 import vn.hoidanit.todo.service.TaskService;
+
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +19,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks(Authentication authentication) {
+    public ResponseEntity<List<Task>> getAllTasks() {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(taskService.getAllTasks());
     }
@@ -33,20 +31,9 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody @Validated Task task, Authentication authentication) {
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // Trả về lỗi 401 nếu không có xác thực
-        }
-
-        // Lấy thông tin người dùng từ token
-        User user = (User) authentication.getPrincipal();
-
-        // Gán user vào task
-        task.setUser(user);
-
-        // Tạo task
-        Task createdTask = taskService.createTask(task);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
+    public ResponseEntity<Task> createTask(@RequestBody Task task) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(taskService.createTask(task));
     }
 
     @PutMapping("/{id}")

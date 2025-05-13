@@ -2,9 +2,7 @@ package vn.hoidanit.todo.service.impl;
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.stereotype.Service;
-
 import lombok.RequiredArgsConstructor;
 import vn.hoidanit.todo.model.Category;
 import vn.hoidanit.todo.model.Task;
@@ -15,9 +13,10 @@ import vn.hoidanit.todo.service.TaskService;
 @Service
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
+
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Task getTaskById(UUID id) {
@@ -50,18 +49,29 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task createTask(Task task) {
+        // Kiểm tra nếu userId không được cung cấp
+        if (task.getUserId() == null) {
+            throw new IllegalArgumentException("User ID must not be null");
+        }
+
+        // Kiểm tra nếu categoryId không được cung cấp
         if (task.getCategoryId() == null) {
             throw new IllegalArgumentException("Category ID must not be null");
         }
 
-        // Lấy category từ database
+        // Lấy thông tin User từ cơ sở dữ liệu
+        User user = userRepository.findById(task.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + task.getUserId()));
+
+        // Lấy thông tin Category từ cơ sở dữ liệu
         Category category = categoryRepository.findById(task.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found with ID: " + task.getCategoryId()));
 
-        // Gán category vào task
+        // Gán User và Category vào Task
+        task.setUser(user);
         task.setCategory(category);
 
-        // Lưu task vào database
+        // Lưu Task vào cơ sở dữ liệu
         return taskRepository.save(task);
     }
 
@@ -75,11 +85,6 @@ public class TaskServiceImpl implements TaskService {
     public Category getCategoryById(UUID categoryId) {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-    }
-
-    @Override
-    public List<Task> getTasksByUserId(UUID userId) {
-        return taskRepository.findByUser_Id(userId);
     }
 
 }

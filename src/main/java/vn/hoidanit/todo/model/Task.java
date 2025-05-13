@@ -3,6 +3,8 @@ package vn.hoidanit.todo.model;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import vn.hoidanit.todo.enums.PriorityStatus;
@@ -12,7 +14,9 @@ import vn.hoidanit.todo.enums.PriorityStatus;
 @Data
 public class Task {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
     private String title;
 
     @Column(columnDefinition = "TEXT")
@@ -45,22 +49,22 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Liên kết với User
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Category category; // Liên kết với Category
+    private Category category;
 
-    @Enumerated(EnumType.STRING) // Lưu enum dưới dạng chuỗi (LOW, MEDIUM, HIGH)
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PriorityStatus status;
 
-    // Constructor phù hợp
-    public Task(String title, String note, boolean completed, Instant deadline, PriorityStatus status) {
-        this.title = title;
-        this.note = note;
-        this.completed = completed;
-        this.deadline = deadline;
-        this.status = status;
-    }
+    @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private UUID userId;
+
+    @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private UUID categoryId;
+
 }

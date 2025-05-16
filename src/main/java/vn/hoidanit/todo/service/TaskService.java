@@ -10,7 +10,7 @@ public interface TaskService {
 
     Task getTaskById(UUID id);
 
-    Task createTask(Task task);
+    Task createTask(Task task, User user);
 
     User getUserById(UUID userId);
 
@@ -19,4 +19,6 @@ public interface TaskService {
     Task updateTask(UUID id, Task task);
 
     void deleteTask(UUID id);
+
+    List<Task> findTasksByUsername(String username); // Tìm task theo username
 }

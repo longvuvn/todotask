@@ -1,5 +1,6 @@
 package vn.hoidanit.todo.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,13 @@ public class UserController {
     private final JwTokenProvider tokenProvider;
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
+
+    // get all user
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userDetailsService.getAllUsers();
+        return ResponseEntity.status(HttpStatus.OK).body(users);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {

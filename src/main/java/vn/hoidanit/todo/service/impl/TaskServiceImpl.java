@@ -39,6 +39,7 @@ public class TaskServiceImpl implements TaskService {
         existingTask.setCompleted(task.isCompleted());
         existingTask.setDeadline(task.getDeadline());
         existingTask.setStatus(task.getStatus());
+        existingTask.setCategory(task.getCategory());
         return taskRepository.save(existingTask);
     }
 
@@ -48,20 +49,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task createTask(Task task) {
-        // Kiểm tra nếu userId không được cung cấp
-        if (task.getUserId() == null) {
-            throw new IllegalArgumentException("User ID must not be null");
-        }
-
+    public Task createTask(Task task, User user) {
         // Kiểm tra nếu categoryId không được cung cấp
         if (task.getCategoryId() == null) {
             throw new IllegalArgumentException("Category ID must not be null");
         }
-
-        // Lấy thông tin User từ cơ sở dữ liệu
-        User user = userRepository.findById(task.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + task.getUserId()));
 
         // Lấy thông tin Category từ cơ sở dữ liệu
         Category category = categoryRepository.findById(task.getCategoryId())
@@ -85,6 +77,12 @@ public class TaskServiceImpl implements TaskService {
     public Category getCategoryById(UUID categoryId) {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
+    }
+
+    @Override
+    public List<Task> findTasksByUsername(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow();
+        return taskRepository.findByUser(user);
     }
 
 }

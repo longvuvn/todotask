@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/v1/**").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()) // authenticated()
 
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không lưu session

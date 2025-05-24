@@ -1,6 +1,7 @@
 package vn.hoidanit.todo.service.impl;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> getAllCategories() {
+
         return categoryRepository.findAll();
     }
 
@@ -33,6 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category updateCategory(UUID id, Category category) {
         Category existingCategory = categoryRepository.findById(id).orElse(null);
+
         if (existingCategory != null) {
             existingCategory.setName(category.getName());
             categoryRepository.save(existingCategory);
@@ -42,6 +45,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(UUID id) {
+        if (!categoryRepository.existsById(id)) {
+            throw new NoSuchElementException("Category with id " + id + " does not exist.");
+        }
         categoryRepository.deleteById(id);
     }
 

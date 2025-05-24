@@ -7,17 +7,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import vn.hoidanit.todo.model.User;
 import vn.hoidanit.todo.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
-
+public class UserDetailCustom implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -72,4 +71,5 @@ public class CustomUserDetailsService implements UserDetailsService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
 }
